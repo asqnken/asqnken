@@ -1,0 +1,10 @@
+# Raw footage and renders stay out of git
+videos/
+*.mp4
+*.mov
+*.webm
+*.m4a
+*.wav
+*.mp3
+.env
+node_modules/
