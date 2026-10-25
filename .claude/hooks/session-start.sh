@@ -9,6 +9,12 @@ fi
 
 VU="$HOME/Developer/video-use"
 
+# Installer progress bars are huge and end up in Claude's context; log them instead
+LOG="$HOME/.cache/session-start.log"
+mkdir -p "$(dirname "$LOG")"
+exec 3>&1 >>"$LOG" 2>&1
+trap 'echo "Video toolchain setup failed; see $LOG" >&3' ERR
+
 # Video-Use (official install.md)
 if [ -d "$VU/.git" ]; then
   git -C "$VU" pull --ff-only || true
@@ -34,7 +40,7 @@ npx --yes hyperframes skills update
 npx --yes hyperframes browser ensure
 
 # Remotion skills
-npx --yes skills add remotion-dev/skills -g -y || true
+npx --yes skills add remotion-dev/skills -g -y -a claude-code || true
 
 # Remotion can't download its own Chrome here (remotion.media is blocked),
 # so point it at the one HyperFrames installed.
@@ -42,3 +48,5 @@ CHROME=$(ls "$HOME"/.cache/hyperframes/chrome/chrome-headless-shell/*/chrome-hea
 if [ -n "$CHROME" ] && [ -n "${CLAUDE_ENV_FILE:-}" ]; then
   echo "export REMOTION_CHROME=\"$CHROME\"" >> "$CLAUDE_ENV_FILE"
 fi
+
+echo "Video toolchain ready (log: $LOG)" >&3
